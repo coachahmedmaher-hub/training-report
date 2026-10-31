@@ -13,7 +13,7 @@ window.SITE = {
   instagram: "coach.ahmed.maher",
 
   // "Book your recovery session" banner on the home page
-  recoveryLink: "https://bit.ly/3UdQiPQ",
+  recoveryLink: "https://coachahmedmaher-hub.github.io/https-coach-ahmed-recovery.github.io/",
 
   // Don't change this after you've made client codes — old codes would stop working.
   key: "am-reports-v1"
