@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Report Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  body{-webkit-user-select:auto;user-select:auto}
+  .adm{max-width:860px;margin:0 auto;padding:28px 20px;display:grid;gap:18px;font-family:"IBM Plex Sans Arabic",var(--body)}
+  .adm h1{font-size:40px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px}
+  .row{display:grid;gap:6px}
+  .row label{font-weight:600;font-size:14px}
+  .row small{color:var(--muted);font-size:12.5px}
+  .row input,.row textarea{font:15px/1.4 inherit;font-family:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+  .row input:focus-visible,.row textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .ltr{direction:ltr;text-align:left;font-family:var(--mono)!important;letter-spacing:.06em}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .btns{display:flex;flex-wrap:wrap;gap:10px}
+  .btn{border:0;border-radius:9px;background:var(--accent);color:#fff;font:600 15px/1 inherit;font-family:inherit;padding:12px 18px;cursor:pointer}
+  .btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .out{background:var(--accent-soft);border-radius:10px;padding:14px 16px;display:none;gap:6px}
+  .out code{font-family:var(--mono);direction:ltr;display:inline-block;background:var(--card);padding:2px 8px;border-radius:5px}
+  .err{color:var(--crit);font-weight:600;min-height:20px}
+  ol{margin:0;padding-inline-start:20px}
+  @media (max-width:600px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="adm">
+  <div><span class="role" style="color:var(--accent)">Coach tools</span><h1>صانع تقارير العملاء</h1>
+    <p style="margin:6px 0 0;color:var(--ink-2)">الصفحة دي ليك انت بس. الملف بيتقري على جهازك ومش بيتبعت لأي مكان.</p></div>
+
+  <div class="box">
+    <div class="row"><label for="file">1) ملف المدرب (Coach_Training_Load.xlsx)</label>
+      <input type="file" id="file" accept=".xlsx"><small>افتح الملف في Excel واعمله Save الأول، عشان الأرقام تبقى محسوبة جواه.</small></div>
+    <div class="two">
+      <div class="row"><label for="client">اسم العميل (هيظهر في التقرير)</label><input id="client" class="ltr" placeholder="Hani"></div>
+      <div class="row"><label for="code">كود العميل</label>
+        <div style="display:flex;gap:8px"><input id="code" class="ltr" style="flex:1" placeholder="HANI-7K4Q2M"><button class="btn alt" id="gen" type="button">كود جديد</button></div>
+        <small>نفس الكود = نفس الملف. لو عملت تقرير جديد بنفس الكود، هيستبدل القديم.</small></div>
+    </div>
+    <div class="two">
+      <div class="row"><label for="label">اسم الفترة</label><input id="label" class="ltr" placeholder="Cycle 1"></div>
+      <div class="row"><label for="subtitle">سطر وصف قصير (اختياري)</label><input id="subtitle" class="ltr" placeholder="3 gym days + 1 conditioning day"></div>
+    </div>
+    <div class="row"><label for="empty">سبب الأسابيع الفاضية (اختياري)</label><input id="empty" class="ltr" placeholder="He moved to the new 4-day program"></div>
+    <div class="row"><label for="notesTitle">عنوان ملاحظاتك (اختياري)</label><input id="notesTitle" class="ltr" placeholder="What changes in cycle 2"></div>
+    <div class="row"><label for="notes">ملاحظاتك للعميل — كل سطر نقطة (اختياري)</label><textarea id="notes" rows="4" class="ltr" placeholder="4 lifting days + 1 CrossFit class, every session ≤ 60 min"></textarea></div>
+    <div class="err" id="err" role="alert"></div>
+    <div class="btns"><button class="btn alt" id="preview" type="button">معاينة التقرير</button><button class="btn" id="make" type="button">اعمل ملف التقرير</button></div>
+    <div class="out" id="out"></div>
+  </div>
+
+  <div class="box">
+    <h2 style="font-size:24px">بعد ما الملف ينزل</h2>
+    <ol>
+      <li>ادخل على الـrepository بتاعك في GitHub، وافتح فولدر <code class="ltr">reports</code>.</li>
+      <li>اضغط <b>Add file ← Upload files</b>، واسحب الملف اللي نزل، وبعدين <b>Commit changes</b>.</li>
+      <li>استنى دقيقة أو اتنين، وابعت للعميل الكود ولينك الموقع.</li>
+    </ol>
+  </div>
+</div>
+<main id="report" hidden></main>
+<div id="tip" role="tooltip"></div>
+
+<script src="assets/config.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/crypto.js"></script>
+<script src="assets/xlsx-lite.js"></script>
+<script src="assets/parse.js"></script>
+<script src="assets/report.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  let parsed = null;
+  const err = t => { $("err").textContent = t || ""; };
+
+  $("gen").addEventListener("click", () => {
+    const abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(6));
+    const base = ($("client").value || "CLIENT").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || "CLIENT";
+    $("code").value = base + "-" + [...r].map(x => abc[x % abc.length]).join("");
+  });
+
+  $("file").addEventListener("change", async () => {
+    err(); parsed = null; const f = $("file").files[0]; if (!f) return;
+    try {
+      const wb = await XLSXLite.readWorkbook(await f.arrayBuffer());
+      parsed = parseCoachFile(wb);
+      if (!$("client").value && parsed.client) $("client").value = parsed.client;
+      if (!parsed.weeks.some(w => w.logged)) err("الملف مفيهوش أي أسبوع متسجل فيه أوزان وتكرارات.");
+    } catch (e) { err("مقدرتش أقرا الملف: " + e.message); }
+  });
+
+  function build() {
+    if (!parsed) { err("اختار ملف المدرب الأول."); return null; }
+    if (!$("client").value.trim()) { err("اكتب اسم العميل."); return null; }
+    err();
+    return { ...parsed, client: $("client").value.trim(), label: $("label").value.trim(), subtitle: $("subtitle").value.trim(),
+      emptyNote: $("empty").value.trim(), notesTitle: $("notesTitle").value.trim(),
+      notes: $("notes").value.split("\n").map(s => s.trim()).filter(Boolean),
+      date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) };
+  }
+
+  $("preview").addEventListener("click", () => {
+    const data = build(); if (!data) return;
+    const R = $("report"); R.hidden = false;
+    Report.render(R, data, () => { R.hidden = true; R.innerHTML = ""; window.scrollTo({ top: 0 }); });
+    R.scrollIntoView({ behavior: "smooth" });
+  });
+
+  $("make").addEventListener("click", async () => {
+    const data = build(); if (!data) return;
+    const code = Vault.normCode($("code").value);
+    if (code.length < 6) { err("الكود لازم يكون 6 حروف/أرقام على الأقل. دوس «كود جديد»."); return; }
+    $("code").value = code;
+    const id = await Vault.reportId(code), file = await Vault.encryptReport(code, data);
+    const blob = new Blob([JSON.stringify(file)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = id + ".json"; document.body.appendChild(a); a.click(); a.remove();
+    const o = $("out"); o.style.display = "grid";
+    o.innerHTML = `<b>الملف نزل: <code>${id}.json</code></b><span>ارفعه في فولدر <code>reports</code>، وابعت للعميل الكود ده: <code>${code}</code></span>`;
+  });
+})();
+</script>
+</body>
+</html>
